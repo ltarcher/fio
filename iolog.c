@@ -140,8 +140,16 @@ static int ipo_special(struct thread_data *td, struct io_piece *ipo)
 			break;
 		}
 		ret = td_io_open_file(td, f);
-		if (!ret)
+		if (!ret) {
+			// Make sure get real file size 
+			int r = blockdev_size(f, &f->real_file_size);
+			if (r) {
+				td_verror(td, r, "blockdev_size");
+				return -1;
+			}
+            log_err("target file open %s.file size:%llu\n", f->file_name, f->real_file_size);
 			break;
+		}
 		td_verror(td, ret, "iolog open file");
 		return -1;
 	case FIO_LOG_CLOSE_FILE:

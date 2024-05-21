@@ -1890,6 +1890,11 @@ struct io_u *get_io_u(struct thread_data *td)
 
 	assert(fio_file_open(f));
 
+	// Make sure offset match target devices size
+	assert(io_u->file->real_file_size);
+	io_u->offset %= io_u->file->real_file_size;
+    io_u->verify_offset %= io_u->file->real_file_size;
+
 	if (ddir_rw(io_u->ddir) && !multi_range_trim(td, io_u)) {
 		if (!io_u->buflen && !td_ioengine_flagged(td, FIO_NOIO)) {
 			dprint(FD_IO, "get_io_u: zero buflen on %p\n", io_u);
